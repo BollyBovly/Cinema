@@ -3,7 +3,7 @@ package ru.stepan.cinema.console;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import ru.stepan.cinema.model.User;
+import ru.stepan.cinema.entity.User;
 import ru.stepan.cinema.service.UserService;
 
 import java.util.Optional;

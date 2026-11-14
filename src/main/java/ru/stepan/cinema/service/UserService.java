@@ -1,7 +1,7 @@
 package ru.stepan.cinema.service;
 
 import org.springframework.stereotype.Service;
-import ru.stepan.cinema.model.User;
+import ru.stepan.cinema.entity.User;
 
 import java.util.Optional;
 import java.util.UUID;

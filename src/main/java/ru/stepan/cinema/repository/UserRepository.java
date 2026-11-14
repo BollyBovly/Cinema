@@ -2,7 +2,7 @@ package ru.stepan.cinema.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.stepan.cinema.model.User;
+import ru.stepan.cinema.entity.User;
 
 import java.util.*;
 

@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.stepan.cinema.console.AppConfig;
-import ru.stepan.cinema.model.User;
+import ru.stepan.cinema.entity.User;
+import ru.stepan.cinema.enums.UserRole;
 import ru.stepan.cinema.repository.BaseUserRepository;
 
 import java.util.Locale;
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
         validatePassword(password);
 
-        User user = new User(null, cleanFirstName, cleanSurname, cleanEmail, city, passwordEncoder.encode(password));
+        User user = new User(null, cleanFirstName, cleanSurname, cleanEmail, city, UserRole.USER, passwordEncoder.encode(password));
         return userRepository.save(user);
     }
 
@@ -85,10 +86,10 @@ public class UserServiceImpl implements UserService {
         if (userRepository.isEmailTakenByOther(uuid, cleanNewEmail)) {
             throw new IllegalArgumentException(TAKEN_EMAIL_MESSAGE);
         }
-            User user = found.get();
-            user.setEmail(cleanNewEmail);
+        User user = found.get();
+        user.setEmail(cleanNewEmail);
 
-            return userRepository.update(user);
+        return userRepository.update(user);
 
     }
 
@@ -107,7 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @PostConstruct
-    public void printAppInfo(){
+    public void printAppInfo() {
         System.out.println(appConfig.getName() + " v" + appConfig.getVersion());
     }
 }

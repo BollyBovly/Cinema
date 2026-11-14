@@ -1,6 +1,6 @@
 package ru.stepan.cinema.repository;
 
-import ru.stepan.cinema.model.User;
+import ru.stepan.cinema.entity.User;
 
 import java.util.UUID;
 
