@@ -3,9 +3,21 @@ package ru.stepan.cinema.console;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import ru.stepan.cinema.entity.User;
+import ru.stepan.cinema.criteria.CinemaSearchCriteria;
+import ru.stepan.cinema.criteria.CinemaSearchCriteriaImpl;
+import ru.stepan.cinema.entity.*;
+import ru.stepan.cinema.enums.AgeRating;
+import ru.stepan.cinema.enums.CinemaStatus;
+import ru.stepan.cinema.repository.CinemaBuildingRepository;
+import ru.stepan.cinema.repository.CinemaHallRepository;
+import ru.stepan.cinema.repository.FilmRepository;
+import ru.stepan.cinema.repository.ScreenRepository;
 import ru.stepan.cinema.service.UserService;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.UUID;
@@ -13,102 +25,51 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class ConsoleRunner implements CommandLineRunner {
-    private final UserService userService;
+    private final CinemaBuildingRepository cinemaRepository;
+    private final CinemaHallRepository hallRepository;
+    private final FilmRepository filmRepository;
+    private final ScreenRepository screenRepository;
+    private final CinemaSearchCriteria criteria;
 
     @Override
     public void run(String... args) {
-        Scanner scanner = new Scanner(System.in);
-        boolean isRunning = true;
+        CinemaBuilding cinema = new CinemaBuilding();
+        cinema.setName("Greenvich");
+        cinema.setCity("Ekaterinburg");
+        cinema.setAddress("Test Address");
+        cinema.setStatus(CinemaStatus.ACTIVE);
+        cinemaRepository.save(cinema);
 
-        while (isRunning) {
-            printMenu();
-            if (!scanner.hasNextLine()) {
-                break;
-            }
-            String command = scanner.nextLine().trim();
+        CinemaHall hall = new CinemaHall();
+        hall.setCinemaBuilding(cinema);
+        hall.setName("1");
+        hallRepository.save(hall);
 
-            try {
-                switch (command) {
-                    case "1" -> createUser(scanner);
-                    case "2" -> updateUserEmail(scanner);
-                    case "3" -> deleteUser(scanner);
-                    case "4" -> findUser(scanner);
-                    case "exit" -> isRunning = false;
-                    default -> System.out.println("Неизвестная команда");
-                }
-            } catch (IllegalArgumentException e) {
-                System.out.println("Ошибка: " + e.getMessage());
-            }
-        }
-        System.out.println("Выход из программы");
-    }
+        Film film = new Film();
+        film.setTitle("Odyssey");
+        film.setDescription("lorem ipsum");
+        film.setReleaseDate(LocalDate.of(2026, 6, 1));
+        film.setDurationMin(120);
+        film.setAgeRating(AgeRating.AGE_16);
+        filmRepository.save(film);
 
-    private void createUser(Scanner scanner) {
-        String name = ask(scanner, "Имя: ");
-        String surname = ask(scanner, "Фамилия");
-        String email = ask(scanner, "Email: ");
-        String city = ask(scanner, "Город: ");
-        String password = ask(scanner, "Пароль: ");
+        Instant start = Instant.now().plus(1, ChronoUnit.DAYS);
+        Screening screening = new Screening();
+        screening.setCinemaHall(hall);
+        screening.setFilm(film);
+        screening.setStartsAt(start);
+        screening.setEndsAt(start.plus(film.getDurationMin(), ChronoUnit.MINUTES));
+        screening.setPrice(new BigDecimal("350.00"));
+        screenRepository.save(screening);
 
-        User user = userService.createUser(name, surname, email, city, password);
-        System.out.println("Пользователь создан"  + user);
-    }
+        System.out.println("Criteria");
+        filmRepository.findByAgeRatingAndReleaseDateBetween(
+                        AgeRating.AGE_16, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31))
+                .forEach(f -> System.out.println(f.getTitle()));
 
-    private UUID askId(Scanner scanner) {
-        String raw = ask(scanner, "id пользователя");
-        try {
-            return UUID.fromString(raw);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Некорректный id" + raw);
-        }
-    }
+        System.out.println("--- Criteria");
+        screenRepository.searchByFilmTitle("Odyssey", Instant.now())
+                .forEach(s -> System.out.println(s.getFilm().getTitle() + " в " + s.getStartsAt()));
 
-    private String ask(Scanner scanner, String line) {
-        System.out.println(line);
-        return scanner.nextLine();
-    }
-
-
-    private void updateUserEmail(Scanner scanner) {
-        UUID id = askId(scanner);
-        String newEmail = ask(scanner, "Новый email: ");
-
-        Optional<User> updated = userService.updateUserEmail(id, newEmail);
-        if (updated.isPresent()) {
-            System.out.println("Email обновлён: " + updated.get());
-        } else {
-            System.out.println("Пользователь с id " + id + " не найден");
-        }
-    }
-
-    private void deleteUser(Scanner scanner) {
-        UUID id = askId(scanner);
-
-        if (userService.deleteUserById(id)) {
-            System.out.println("Пользователь удалён");
-        } else {
-            System.out.println("Пользователь с id " + id + " не найден");
-        }
-    }
-
-    private void findUser(Scanner scanner) {
-        UUID id = askId(scanner);
-
-        Optional<User> found = userService.getUserById(id);
-        if (found.isPresent()) {
-            System.out.println(found.get());
-        } else {
-            System.out.println("Пользователь с id " + id + " не найден");
-        }
-    }
-
-    private void printMenu() {
-        System.out.println();
-        System.out.println("Введите команду:" + "\n" +
-                "1 - Создание пользователя" + "\n" +
-                "2 - Изменить email у пользователя" + "\n" +
-                "3 - Удаление пользователя" + "\n" +
-                "4 - Найти пользователя по id" + "\n" +
-                "exit - выход");
     }
 }

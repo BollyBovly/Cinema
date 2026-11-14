@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Table(name = "cinema_hall",
         uniqueConstraints = @UniqueConstraint(
-                name = "uk_seat",
+                name = "uk_cinema_hall",
                 columnNames = {"cinema_id", "name"}
         ))
 public class CinemaHall {

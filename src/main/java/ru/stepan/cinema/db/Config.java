@@ -14,11 +14,7 @@ import java.util.UUID;
 
 @Configuration
 public class Config {
-    @Bean
-    @Scope(value = BeanDefinition.SCOPE_SINGLETON)
-    public Map<UUID, User> userMap() {
-        return new HashMap<>();
-    }
+
 
     @Bean
     public PasswordEncoder passwordEndcore(){

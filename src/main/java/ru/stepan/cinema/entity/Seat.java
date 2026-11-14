@@ -18,7 +18,6 @@ import java.util.UUID;
         )
 )
 public class Seat {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")

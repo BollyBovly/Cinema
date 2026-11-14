@@ -2,12 +2,13 @@ package ru.stepan.cinema.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.stepan.cinema.console.AppConfig;
 import ru.stepan.cinema.entity.User;
 import ru.stepan.cinema.enums.UserRole;
-import ru.stepan.cinema.repository.BaseUserRepository;
+import ru.stepan.cinema.repository.UserRepository;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -23,10 +24,10 @@ public class UserServiceImpl implements UserService {
             Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     private static final int MIN_PASSWORD_LENGTH = 5;
     private static final String TAKEN_EMAIL_MESSAGE = "Пользователь с таким email уже существует";
+    private UserRepository userRepository;
 
     private final AppConfig appConfig;
     private final PasswordEncoder passwordEncoder;
-    private final BaseUserRepository userRepository;
 
     @Override
     public User createUser(String firstName, String surname, String email, String city, String password) {
@@ -34,7 +35,7 @@ public class UserServiceImpl implements UserService {
         String cleanSurname = validateName(surname, "Фамилия");
         String cleanEmail = validateEmail(email, "Email");
 
-        if (userRepository.isEmailTaken(cleanEmail)) {
+        if (userRepository.existsByEmail(cleanEmail)) {
             throw new IllegalArgumentException(TAKEN_EMAIL_MESSAGE);
         }
 
@@ -83,13 +84,13 @@ public class UserServiceImpl implements UserService {
             return Optional.empty();
         }
 
-        if (userRepository.isEmailTakenByOther(uuid, cleanNewEmail)) {
+        if (userRepository.existsByEmailAndIdNot(cleanNewEmail, uuid)) {
             throw new IllegalArgumentException(TAKEN_EMAIL_MESSAGE);
         }
         User user = found.get();
         user.setEmail(cleanNewEmail);
 
-        return userRepository.update(user);
+        return Optional.of(userRepository.save(user));
 
     }
 
@@ -98,7 +99,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findById(userId).isEmpty()) {
             return false;
         }
-        userRepository.delete(userId);
+        userRepository.deleteById(userId);
         return true;
     }
 
