@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
             Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     private static final int MIN_PASSWORD_LENGTH = 5;
     private static final String TAKEN_EMAIL_MESSAGE = "Пользователь с таким email уже существует";
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final AppConfig appConfig;
     private final PasswordEncoder passwordEncoder;

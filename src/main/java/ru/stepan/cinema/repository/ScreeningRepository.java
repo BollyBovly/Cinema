@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public interface ScreenRepository extends CrudRepository<Screening, UUID> {
+public interface ScreeningRepository extends CrudRepository<Screening, UUID> {
     @Query("select s from Screening s join fetch s.film f where f.title = :title and s.startsAt >= :from")
     List<Screening> searchByFilmTitle(@Param("title") String title, @Param("from")Instant from);
 }

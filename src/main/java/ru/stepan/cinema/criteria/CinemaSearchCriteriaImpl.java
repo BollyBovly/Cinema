@@ -1,9 +1,7 @@
 package ru.stepan.cinema.criteria;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.stepan.cinema.entity.CinemaBuilding;
@@ -40,10 +38,14 @@ public class CinemaSearchCriteriaImpl implements CinemaSearchCriteria {
         CriteriaQuery<Screening> cq = cb.createQuery(Screening.class);
         Root<Screening> screening = cq.from(Screening.class);
 
+        Fetch<Screening, Film> filmFetch = screening.fetch("film");
+        Join<Screening, Film> film = (Join<Screening, Film>) filmFetch;
+
         cq.select(screening).where(
-                cb.equal(screening.get("title"), title),
-                cb.greaterThanOrEqualTo(screening.<Instant>get("startAt"), from)
+                cb.equal(film.get("title"), title),
+                cb.greaterThanOrEqualTo(screening.<Instant>get("startsAt"), from)
         );
         return em.createQuery(cq).getResultList();
+
     }
 }

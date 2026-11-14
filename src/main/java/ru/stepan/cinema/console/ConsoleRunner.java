@@ -2,74 +2,71 @@ package ru.stepan.cinema.console;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import ru.stepan.cinema.criteria.CinemaSearchCriteria;
-import ru.stepan.cinema.criteria.CinemaSearchCriteriaImpl;
-import ru.stepan.cinema.entity.*;
-import ru.stepan.cinema.enums.AgeRating;
-import ru.stepan.cinema.enums.CinemaStatus;
-import ru.stepan.cinema.repository.CinemaBuildingRepository;
-import ru.stepan.cinema.repository.CinemaHallRepository;
-import ru.stepan.cinema.repository.FilmRepository;
-import ru.stepan.cinema.repository.ScreenRepository;
 import ru.stepan.cinema.service.UserService;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.UUID;
 
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 public class ConsoleRunner implements CommandLineRunner {
-    private final CinemaBuildingRepository cinemaRepository;
-    private final CinemaHallRepository hallRepository;
-    private final FilmRepository filmRepository;
-    private final ScreenRepository screenRepository;
-    private final CinemaSearchCriteria criteria;
+    private final UserService userService;
 
     @Override
     public void run(String... args) {
-        CinemaBuilding cinema = new CinemaBuilding();
-        cinema.setName("Greenvich");
-        cinema.setCity("Ekaterinburg");
-        cinema.setAddress("Test Address");
-        cinema.setStatus(CinemaStatus.ACTIVE);
-        cinemaRepository.save(cinema);
+        Scanner scanner = new Scanner(System.in);
 
-        CinemaHall hall = new CinemaHall();
-        hall.setCinemaBuilding(cinema);
-        hall.setName("1");
-        hallRepository.save(hall);
+        while (true) {
+            System.out.println("""
+                    1 - Создать пользователя
+                    2 - Изменить email
+                    3 - Удалить пользователя
+                    4 - Найти по id
+                    exit - выход""");
 
-        Film film = new Film();
-        film.setTitle("Odyssey");
-        film.setDescription("lorem ipsum");
-        film.setReleaseDate(LocalDate.of(2026, 6, 1));
-        film.setDurationMin(120);
-        film.setAgeRating(AgeRating.AGE_16);
-        filmRepository.save(film);
+            if (!scanner.hasNextLine()) {
+                break;
+            }
+            String command = scanner.nextLine().trim();
+            if (command.equals("exit")) {
+                break;
+            }
 
-        Instant start = Instant.now().plus(1, ChronoUnit.DAYS);
-        Screening screening = new Screening();
-        screening.setCinemaHall(hall);
-        screening.setFilm(film);
-        screening.setStartsAt(start);
-        screening.setEndsAt(start.plus(film.getDurationMin(), ChronoUnit.MINUTES));
-        screening.setPrice(new BigDecimal("350.00"));
-        screenRepository.save(screening);
+            try {
+                switch (command) {
+                    case "1" -> System.out.println(userService.createUser(
+                            ask(scanner, "Имя: "), ask(scanner, "Фамилия: "), ask(scanner, "Email: "),
+                            ask(scanner, "Город: "), ask(scanner, "Пароль: ")));
+                    case "2" -> System.out.println(userService
+                            .updateUserEmail(askId(scanner), ask(scanner, "Новый email: "))
+                            .map(Object::toString).orElse("Пользователь не найден"));
+                    case "3" -> System.out.println(userService.deleteUserById(askId(scanner))
+                            ? "Удалён" : "Пользователь не найден");
+                    case "4" -> System.out.println(userService.getUserById(askId(scanner))
+                            .map(Object::toString).orElse("Пользователь не найден"));
+                    default -> System.out.println("Неизвестная команда");
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println("Ошибка: " + e.getMessage());
+            }
+        }
+        System.out.println("Выход из программы");
+    }
 
-        System.out.println("Criteria");
-        filmRepository.findByAgeRatingAndReleaseDateBetween(
-                        AgeRating.AGE_16, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31))
-                .forEach(f -> System.out.println(f.getTitle()));
+    private String ask(Scanner scanner, String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine();
+    }
 
-        System.out.println("--- Criteria");
-        screenRepository.searchByFilmTitle("Odyssey", Instant.now())
-                .forEach(s -> System.out.println(s.getFilm().getTitle() + " в " + s.getStartsAt()));
-
+    private UUID askId(Scanner scanner) {
+        String raw = ask(scanner, "id: ").trim();
+        try {
+            return UUID.fromString(raw);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Некорректный id: " + raw);
+        }
     }
 }

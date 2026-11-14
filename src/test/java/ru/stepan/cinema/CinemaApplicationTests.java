@@ -1,13 +1,10 @@
 package ru.stepan.cinema;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class CinemaApplicationTests {
+class CinemaApplicationTests extends AbstractIntegrationTest {
 
     @Test
     void contextLoads() {
     }
-
 }
