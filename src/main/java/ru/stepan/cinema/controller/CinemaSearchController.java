@@ -2,19 +2,18 @@ package ru.stepan.cinema.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.stepan.cinema.dto.FilmResponse;
 import ru.stepan.cinema.dto.ScreeningResponse;
 import ru.stepan.cinema.enums.AgeRating;
+import ru.stepan.cinema.exception.ResourceNotFoundException;
 import ru.stepan.cinema.repository.FilmRepository;
 import ru.stepan.cinema.repository.ScreeningRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -46,5 +45,10 @@ public class CinemaSearchController {
                 .stream().map(ScreeningResponse::from).toList();
     }
 
-
+    @GetMapping("/films/{id}")
+    public FilmResponse getFilm(@PathVariable UUID id) {
+        return filmRepository.findById(id)
+                .map(FilmResponse::from)
+                .orElseThrow(() -> new ResourceNotFoundException("Фильм не найден: " + id));
+    }
 }
