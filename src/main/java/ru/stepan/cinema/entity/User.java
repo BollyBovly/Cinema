@@ -1,5 +1,6 @@
 package ru.stepan.cinema.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.stepan.cinema.enums.UserRole;
@@ -29,6 +30,7 @@ public class User {
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 60)
     @ToString.Exclude
     private String passwordHash;
