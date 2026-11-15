@@ -108,6 +108,14 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId);
     }
 
+    @Override
+    public Optional<User> getUserByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+        return userRepository.findByEmail(email.trim().toLowerCase(Locale.ROOT));
+    }
+
     @PostConstruct
     public void printAppInfo() {
         System.out.println(appConfig.getName() + " v" + appConfig.getVersion());

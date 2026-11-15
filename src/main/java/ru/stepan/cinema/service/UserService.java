@@ -12,4 +12,5 @@ public interface UserService {
     Optional<User> updateUserEmail(UUID uuid, String newEmail);
     boolean deleteUserById(UUID userId);
     Optional<User> getUserById(UUID userId);
+    Optional<User> getUserByEmail(String email);
 }

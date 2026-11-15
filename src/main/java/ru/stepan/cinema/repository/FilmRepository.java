@@ -10,6 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 @RepositoryRestResource(path = "films", collectionResourceRel = "films")
-public interface FilmRepository extends CrudRepository<Film, UUID>{
+public interface FilmRepository extends CrudRepository<Film, UUID> {
     List<Film> findByAgeRatingAndReleaseDateBetween(AgeRating ageRating, LocalDate from, LocalDate to);
 }

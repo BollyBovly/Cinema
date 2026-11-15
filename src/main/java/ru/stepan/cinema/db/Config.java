@@ -15,9 +15,4 @@ import java.util.UUID;
 @Configuration
 public class Config {
 
-
-    @Bean
-    public PasswordEncoder passwordEndcore(){
-        return new BCryptPasswordEncoder();
-    }
 }
