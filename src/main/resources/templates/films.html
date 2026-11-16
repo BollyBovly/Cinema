@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Film List</title>
+</head>
+<body>
+<h1>Film List</h1>
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Выйти</button>
+</form>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Duration, min</th>
+        <th>Release date</th>
+        <th>Age</th>
+    </tr>
+    <tr th:each="film : ${films}">
+        <td th:text="${film.id}"></td>
+        <td th:text="${film.title}"></td>
+        <td th:text="${film.durationMin}"></td>
+        <td th:text="${film.releaseDate}"></td>
+        <td th:text="${film.ageRating.minAge} + '+'"></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(films)}">
+        <td colspan="5">Фильмов пока нет</td>
+    </tr>
+</table>
+</body>
+</html>
